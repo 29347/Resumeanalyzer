@@ -6,79 +6,76 @@ from google.genai import types
 
 app = Flask(__name__)
 
-# Paste your API Key here (keep the quotes!)
+# --- CONFIGURATION ---
+# Get API Key from Render Environment Variables
+# TEMPORARY FOR TESTING (Remove before uploading to GitHub!)
 GEMINI_API_KEY = os.environ.get("AIzaSyD022UM3HxgozgEavXGCmM6jcwrBbPjWUY")
-
-# Initialize the Google GenAI Client
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 
-def score_resume(resume_text):
+def score_resume_pdf(file_bytes):
     """
-    Sends the resume text to Google Gemini (Flash model) to analyze.
+    Sends PDF bytes directly to Gemini for analysis.
     """
     try:
-        # The prompt defines the persona and the strict JSON output format
-        prompt = f"""
-        You are an expert career coach and resume critic. Review the following resume text.
+        prompt = """
+        You are an expert technical recruiter. Review this attached resume PDF.
         
-        1. Analyze it for Clarity, Impact (action verbs, metrics), and Structure.
-        2. Assign a score from 0 to 100.
-        3. Provide 3-5 specific, actionable improvements.
+        1. Analyze the layout, skills, and impact.
+        2. Assign a score from 0-100.
+        3. Provide 3-5 specific, harsh but constructive improvements.
         
-        STRICTLY return the result as a JSON object with this structure:
-        {{
+        STRICTLY return the result as this JSON format:
+        {
             "score": 85,
-            "feedback": ["First improvement...", "Second improvement...", "Third improvement..."]
-        }}
-
-        Resume Text:
-        {resume_text}
+            "feedback": ["Point 1", "Point 2", "Point 3"]
+        }
         """
 
-        # Call the API using the Flash model (Fast & Free-tier eligible)
-        # We use 'response_mime_type' to ensure Gemini gives us valid JSON
+        # We pass the raw PDF bytes directly to the model!
         response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=prompt,
+            contents=[
+                types.Part.from_bytes(
+                    data=file_bytes, mime_type="application/pdf"),
+                prompt
+            ],
             config=types.GenerateContentConfig(
                 response_mime_type="application/json"
             )
         )
 
-        # Parse the JSON response
-        # Gemini usually returns raw text, but with JSON mode, it's clean
         result = json.loads(response.text)
-
         return result.get("score", 0), result.get("feedback", [])
 
     except Exception as e:
         print(f"Error calling Gemini: {e}")
-        return 0, [f"Error: {str(e)}. Check your API Key or Internet."]
-
-# --- FLASK ROUTES ---
+        return 0, [f"Error processing PDF. Please ensure it is a valid PDF file."]
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        resume_text = request.form.get('resume_input')
+        # Check if file is present in the request
+        if 'resume_file' not in request.files:
+            return render_template('index.html', error="No file uploaded.")
 
-        if not resume_text:
-            return render_template('index.html', error="Please paste your resume text.")
+        file = request.files['resume_file']
 
-        final_score, feedback = score_resume(resume_text)
+        if file.filename == '':
+            return render_template('index.html', error="No selected file.")
 
-        return render_template('index.html',
-                               score=final_score,
-                               feedback=feedback,
-                               input_text=resume_text)
+        if file:
+            # Read the file into memory (bytes)
+            file_bytes = file.read()
+            final_score, feedback = score_resume_pdf(file_bytes)
+
+            return render_template('index.html',
+                                   score=final_score,
+                                   feedback=feedback)
 
     return render_template('index.html')
 
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
