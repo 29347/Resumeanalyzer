@@ -6,9 +6,8 @@ from google.genai import types
 
 app = Flask(__name__)
 
-# --- CONFIGURATION ---
 # Paste your API Key here (keep the quotes!)
-GEMINI_API_KEY = "AIzaSyCGRh9FiKGa7K7f1V-7QYiElnmtsSTEDck"
+GEMINI_API_KEY = os.environ.get("AIzaSyCGRh9FiKGa7K7f1V-7QYiElnmtsSTEDck")
 
 # Initialize the Google GenAI Client
 client = genai.Client(api_key=GEMINI_API_KEY)
@@ -80,3 +79,4 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
