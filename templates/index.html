@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Student Resume Analyzer Demo</title>
+    <title>AI Resume Reviewer</title>
     <style>
       body {
         font-family: sans-serif;
@@ -14,30 +14,29 @@
         color: #333;
         text-align: center;
       }
-      form {
+      .upload-box {
         background: white;
-        padding: 20px;
+        padding: 40px;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
       }
-      textarea {
-        width: 100%;
-        height: 250px;
+      input[type="file"] {
         padding: 10px;
-        border: 1px solid #ccc;
+        border: 2px dashed #ccc;
         border-radius: 4px;
-        box-sizing: border-box;
-        resize: vertical;
+        width: 80%;
+        margin-bottom: 20px;
       }
       button {
         background-color: #007bff;
         color: white;
-        padding: 10px 15px;
+        padding: 12px 24px;
         border: none;
         border-radius: 4px;
         cursor: pointer;
         font-size: 16px;
-        margin-top: 10px;
+        font-weight: bold;
       }
       button:hover {
         background-color: #0056b3;
@@ -49,22 +48,17 @@
         border: 2px solid #28a745;
         background-color: #e2ffe8;
       }
-      .score-display {
+      .score {
         font-size: 3em;
         font-weight: bold;
         color: #28a745;
         text-align: center;
-        margin-bottom: 10px;
-      }
-      .feedback-list {
-        list-style-type: none;
-        padding: 0;
       }
       .feedback-list li {
         margin-bottom: 10px;
         padding: 8px;
+        background-color: #fff;
         border-left: 5px solid #ffc107;
-        background-color: #fff9e6;
       }
       .error {
         color: red;
@@ -75,27 +69,25 @@
     </style>
   </head>
   <body>
-    <h1>Student Resume Analyzer Demo</h1>
+    <h1>AI Resume Reviewer 🚀</h1>
 
-    <form method="POST">
-      <h2>Paste Your Resume Text Below</h2>
-      <textarea
-        name="resume_input"
-        placeholder="Paste your resume text here (Education, Experience, Skills, Contact, etc.)"
-      >
-{{ input_text if input_text }}</textarea
-      >
-      <button type="submit">Analyze Resume</button>
-    </form>
+    <div class="upload-box">
+      <h2>Upload Your Resume (PDF)</h2>
+      <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="resume_file" accept=".pdf" required />
+        <br />
+        <button type="submit">Analyze with AI</button>
+      </form>
+    </div>
 
     {% if error %}
     <div class="error">{{ error }}</div>
     {% endif %} {% if score is not none %}
     <div class="results">
       <h2>Analysis Results</h2>
-      <p class="score-display">{{ score }}/100</p>
+      <div class="score">{{ score }}/100</div>
 
-      <h3>Feedback and Suggestions:</h3>
+      <h3>💡 Feedback & Suggestions:</h3>
       <ul class="feedback-list">
         {% for item in feedback %}
         <li>{{ item }}</li>
