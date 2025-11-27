@@ -9,7 +9,7 @@ app = Flask(__name__)
 # --- CONFIGURATION ---
 # Get API Key from Render Environment Variables
 # TEMPORARY FOR TESTING (Remove before uploading to GitHub!)
-GEMINI_API_KEY = os.environ.get("AIzaSyD022UM3HxgozgEavXGCmM6jcwrBbPjWUY")
+GEMINI_API_KEY = os.environ.get("AIzaSyBUQXZnjyu5d5OjOarmaptgV2ydprJps70")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 
@@ -79,3 +79,4 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
